@@ -1,17 +1,13 @@
-# v01 — Base React/Vite project
+# v02 — Routing and basic auth pages
 
-This is the first frontend version. It contains only a minimal React + Vite application with one static screen.
+Added client-side routing and first static pages.
 
-What exists:
-- `main.tsx`
-- `App.tsx`
-- global CSS
+Added:
+- `react-router-dom`
+- `/`, `/login`, `/register`
+- static login/register forms
 
-What is not added yet:
-- routing
-- API connection
-- authentication
-- learning pages
-- lessons
-- progress
-- admin panel
+Still missing:
+- API calls
+- JWT storage
+- protected routes
