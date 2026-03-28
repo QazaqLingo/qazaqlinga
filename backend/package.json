@@ -1,5 +1,5 @@
 {
-  "name": "qazaqlinga-backend-v02",
+  "name": "qazaqlinga-backend-v03",
   "version": "1.0.0",
   "main": "server.js",
   "description": "Historical backend version for QazaqLinga",
@@ -11,7 +11,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "mongoose": "^8.8.3"
+    "mongoose": "^8.8.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

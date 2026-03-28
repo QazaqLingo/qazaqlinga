@@ -1,3 +1,3 @@
-# v02 — MongoDB Connection
+# v03 — Authentication and Users
 
-Добавлено подключение к MongoDB через `config/mongo.js` и `db/bootstrap.js`.
+Добавлены `User`, регистрация, вход, JWT и `/api/auth/me`.
