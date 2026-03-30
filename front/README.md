@@ -1,13 +1,9 @@
-# v02 — Routing and basic auth pages
-
-Added client-side routing and first static pages.
+# v03 — API, authentication and JWT
 
 Added:
-- `react-router-dom`
-- `/`, `/login`, `/register`
-- static login/register forms
-
-Still missing:
-- API calls
-- JWT storage
-- protected routes
+- Axios API client
+- API base URL configuration
+- `AuthContext`
+- JWT storage in `localStorage`
+- login/register connected to backend
+- protected dashboard route
