@@ -1,0 +1,1 @@
+const mongoose = require('mongoose'); const { Schema } = mongoose; const schema = new Schema({ unitId:{type:Schema.Types.ObjectId,ref:'Unit',required:true}, title:String, type:{type:String,default:'theory'}, xpReward:{type:Number,default:10}, content:String, orderNum:Number }, {timestamps:true}); module.exports = mongoose.model('Lesson', schema);

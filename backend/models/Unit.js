@@ -1,0 +1,1 @@
+const mongoose = require('mongoose'); const { Schema } = mongoose; const schema = new Schema({ moduleId:{type:Schema.Types.ObjectId,ref:'Module',required:true}, title:String, titleKz:String, subtitle:String, icon:String, orderNum:Number, lessonCount:{type:Number,default:0} }, {timestamps:true}); module.exports = mongoose.model('Unit', schema);

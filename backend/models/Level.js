@@ -1,0 +1,1 @@
+const mongoose = require('mongoose'); const { Schema } = mongoose; const schema = new Schema({ code:{type:String,required:true,unique:true}, name:String, description:String, orderNum:Number }, {timestamps:true}); module.exports = mongoose.model('Level', schema);

@@ -1,0 +1,1 @@
+const mongoose = require('mongoose'); const { Schema } = mongoose; const schema = new Schema({ levelId:{type:Schema.Types.ObjectId,ref:'Level',required:true}, title:String, titleKz:String, description:String, orderNum:Number, requiredXp:{type:Number,default:0} }, {timestamps:true}); module.exports = mongoose.model('Module', schema);

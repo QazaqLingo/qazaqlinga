@@ -1,3 +1,3 @@
-# v03 — Authentication and Users
+# v04 — Learning Content Read API
 
-Добавлены `User`, регистрация, вход, JWT и `/api/auth/me`.
+Добавлены levels, modules, units, lessons, exercises и seed. Прогресса и XP еще нет.

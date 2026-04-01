@@ -1,0 +1,1 @@
+const mongoose = require('mongoose'); const { Schema } = mongoose; const schema = new Schema({ lessonId:{type:Schema.Types.ObjectId,ref:'Lesson',required:true}, type:String, question:String, options:[String], correctAnswer:String, explanation:String, orderNum:Number }, {timestamps:true}); module.exports = mongoose.model('Exercise', schema);

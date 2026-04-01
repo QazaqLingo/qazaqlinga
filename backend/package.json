@@ -1,11 +1,12 @@
 {
-  "name": "qazaqlinga-backend-v03",
+  "name": "qazaqlinga-backend-v04",
   "version": "1.0.0",
   "main": "server.js",
   "description": "Historical backend version for QazaqLinga",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "db:seed": "node db/seed.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
