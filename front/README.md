@@ -1,9 +1,12 @@
-# v03 — API, authentication and JWT
+# v04 — Learning content map
+
+Added levels, modules, units and lesson list screens.
 
 Added:
-- Axios API client
-- API base URL configuration
-- `AuthContext`
-- JWT storage in `localStorage`
-- login/register connected to backend
-- protected dashboard route
+- `getLevels`, `getModule`, `getUnitLessons`
+- module/learning map page
+- unit lesson list page
+
+Still missing:
+- lesson answering
+- XP/progress logic on frontend

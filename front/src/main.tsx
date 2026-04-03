@@ -5,6 +5,4 @@ import { AuthProvider } from './context/AuthContext'
 import './index.css'
 import App from './App'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode><BrowserRouter><AuthProvider><App /></AuthProvider></BrowserRouter></StrictMode>,
-)
+createRoot(document.getElementById('root')!).render(<StrictMode><BrowserRouter><AuthProvider><App /></AuthProvider></BrowserRouter></StrictMode>)
