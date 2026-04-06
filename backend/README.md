@@ -1,3 +1,3 @@
-# v04 — Learning Content Read API
+# v05 — Lesson Completion, XP and Basic Progress
 
-Добавлены levels, modules, units, lessons, exercises и seed. Прогресса и XP еще нет.
+Добавлены проверка ответов, завершение урока, начисление XP и dashboard прогресса.
