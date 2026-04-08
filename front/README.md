@@ -1,12 +1,9 @@
-# v04 — Learning content map
-
-Added levels, modules, units and lesson list screens.
+# v05 — Lesson flow, answers, XP and progress
 
 Added:
-- `getLevels`, `getModule`, `getUnitLessons`
-- module/learning map page
-- unit lesson list page
+- lesson page
+- answer submission
+- lesson completion
+- XP completion screen
 
-Still missing:
-- lesson answering
-- XP/progress logic on frontend
+This version is the first version where users can complete actual learning activities.
