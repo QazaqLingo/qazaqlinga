@@ -1,3 +1,3 @@
-# v05 — Lesson Completion, XP and Basic Progress
+# v06 — Gamification
 
-Добавлены проверка ответов, завершение урока, начисление XP и dashboard прогресса.
+Добавлены skills, quests, streak/XP logic extension, dashboard и rating.
