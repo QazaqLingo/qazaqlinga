@@ -1,0 +1,2 @@
+import { FormEvent,useState } from 'react'; import { updateProfile } from '../api'; import { useAuth } from '../context/AuthContext'
+export default function ProfilePage(){const{user,refreshUser}=useAuth();const[name,setName]=useState(user?.name||'');async function submit(e:FormEvent){e.preventDefault();await updateProfile({name});await refreshUser()}return <main className="page"><form className="form card" onSubmit={submit}><h1>Profile</h1><p>{user?.email}</p><input value={name} onChange={e=>setName(e.target.value)}/><button>Save</button></form></main>}

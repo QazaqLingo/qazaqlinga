@@ -1,0 +1,2 @@
+import { useEffect,useState } from 'react'; import { getReviewWords } from '../api'
+export default function ReviewWordsPage(){const[words,setWords]=useState<any[]>([]);useEffect(()=>{getReviewWords().then(setWords)},[]);return <main className="page"><h1>Review words</h1><div className="grid">{words.map((w:any,i)=><div className="card" key={i}><h3>{w.word||w.kz}</h3><p>{w.translation||w.ru||w.en}</p></div>)}</div></main>}

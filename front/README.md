@@ -1,9 +1,10 @@
-# v05 — Lesson flow, answers, XP and progress
+# v06 — Gamification, profile and review features
 
 Added:
-- lesson page
-- answer submission
-- lesson completion
-- XP completion screen
+- dashboard/progress API calls
+- Sidebar progress widget
+- profile editing
+- rating/leaderboard
+- review words
 
-This version is the first version where users can complete actual learning activities.
+This version represents the frontend after adding gamification and personal progress screens.

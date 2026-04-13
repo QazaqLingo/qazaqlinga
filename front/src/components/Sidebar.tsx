@@ -1,0 +1,2 @@
+import { useEffect,useState } from 'react'; import { getDashboard } from '../api'
+export default function Sidebar(){const[data,setData]=useState<any>(null);useEffect(()=>{getDashboard().then(setData).catch(()=>{})},[]);return <aside className="card"><h2>{data?.user?.xp||0} XP</h2><p>Streak: {data?.user?.streak||0}</p><h3>Skills</h3>{data?.skills?.map((s:any)=><p key={s.skill_name}>{s.skill_name}: {s.progress}%</p>)}</aside>}
