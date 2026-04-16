@@ -1,3 +1,3 @@
-# v06 — Gamification
+# v07 — Admin Panel and File Uploads
 
-Добавлены skills, quests, streak/XP logic extension, dashboard и rating.
+Добавлены admin middleware, CRUD для контента, `/api/admin/stats`, `multer` и `/uploads`.
