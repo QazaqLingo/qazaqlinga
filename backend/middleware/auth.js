@@ -1,15 +1,23 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 function authMiddleware(req, res, next) {
-  const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-  if (!token) return res.status(401).json({ message: 'No token provided' });
+  const header = req.headers.authorization;
+  if (!header) {
+    return res.status(401).json({ error: 'Нет токена авторизации' });
+  }
+
+  const token = header.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'Неверный формат токена' });
+  }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
     next();
-  } catch {
-    res.status(401).json({ message: 'Invalid token' });
+  } catch (err) {
+    return res.status(401).json({ error: 'Токен недействителен' });
   }
 }
 

@@ -1,23 +1,74 @@
 const express = require('express');
-const User = require('../models/User');
-const UserLessonProgress = require('../models/UserLessonProgress');
-const UserSkill = require('../models/UserSkill');
-const UserQuest = require('../models/UserQuest');
+const {
+  getDashboardData,
+  getUserStats,
+  getRating,
+  getReviewWordsForUser,
+} = require('../repositories/progressRepository');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
+// Get user dashboard data (skills, quests, stats)
 router.get('/dashboard', authMiddleware, async (req, res) => {
-  const user = await User.findById(req.user.id).select('-passwordHash').lean();
-  const completedLessons = await UserLessonProgress.countDocuments({ userId: req.user.id, completed: true });
-  const skills = await UserSkill.find({ userId: req.user.id }).lean();
-  const quests = await UserQuest.find({ userId: req.user.id }).lean();
-  res.json({ user, completedLessons, skills, quests });
+  try {
+    const userId = req.user.id;
+
+    const dashboard = await getDashboardData(userId);
+    res.json(dashboard);
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
 });
 
-router.get('/rating', async (req, res) => {
-  const users = await User.find().select('name xp streak').sort({ xp: -1 }).limit(20).lean();
-  res.json(users);
+// Words from completed lessons (for review / smart reminder)
+router.get('/review-words', authMiddleware, async (req, res) => {
+  try {
+    const words = await getReviewWordsForUser(req.user.id);
+    res.json(words);
+  } catch (err) {
+    console.error('Review words error:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// Get user statistics
+router.get('/stats', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const stats = await getUserStats(userId);
+    res.json(stats);
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// Get proverb of the day
+router.get('/proverb', authMiddleware, async (req, res) => {
+  const proverbs = [
+    { text: 'Отан – отбасынан басталады.', translation: 'Родина начинается с семьи.', translation_en: 'Motherland begins with the family.' },
+    { text: 'Тіл – білімнің кілті.', translation: 'Язык – ключ к знаниям.', translation_en: 'Language is the key to knowledge.' },
+    { text: 'Білім – бақыттың кілті.', translation: 'Знание – ключ к счастью.', translation_en: 'Knowledge is the key to happiness.' },
+    { text: 'Еңбек етсең ерінбей, тояды қарның тіленбей.', translation: 'Кто трудится – не голодает.', translation_en: 'He who works hard will never go hungry.' },
+    { text: 'Бірлік бар жерде, тірлік бар.', translation: 'Где единство, там и жизнь.', translation_en: 'Where there is unity, there is life.' },
+  ];
+
+  const dayIndex = new Date().getDate() % proverbs.length;
+  res.json({ ...proverbs[dayIndex], xp_reward: 50 });
+});
+
+// Rating (leaderboard)
+router.get('/rating', authMiddleware, async (req, res) => {
+  try {
+    const result = await getRating();
+    res.json(result);
+  } catch (err) {
+    console.error('Get rating error:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
 });
 
 module.exports = router;

@@ -1,22 +1,61 @@
 const express = require('express');
-const Level = require('../models/Level');
-const Module = require('../models/Module');
-const Unit = require('../models/Unit');
+const {
+  getLevelsWithModules,
+  getModuleByIdForUser,
+  getNextModulePreview,
+} = require('../repositories/moduleRepository');
+const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/levels', async (req, res) => {
-  const levels = await Level.find().sort({ orderNum: 1 }).lean();
-  const modules = await Module.find().sort({ orderNum: 1 }).lean();
-  res.json(levels.map(level => ({ ...level, modules: modules.filter(module => String(module.levelId) === String(level._id)) })));
+// Get all levels with their modules
+router.get('/levels', authMiddleware, async (req, res) => {
+  try {
+    const result = await getLevelsWithModules();
+    res.json(result);
+  } catch (err) {
+    console.error('Get levels error:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
 });
 
-router.get('/:moduleId', async (req, res) => {
-  const module = await Module.findById(req.params.moduleId).lean();
-  if (!module) return res.status(404).json({ message: 'Module not found' });
+// Get module with units and user progress
+router.get('/:moduleId', authMiddleware, async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+    const userId = req.user.id;
 
-  const units = await Unit.find({ moduleId: module._id }).sort({ orderNum: 1 }).lean();
-  res.json({ ...module, units });
+    const moduleData = await getModuleByIdForUser(moduleId, userId);
+    if (!moduleData) {
+      return res.status(404).json({ error: 'Модуль не найден' });
+    }
+
+    res.json(moduleData);
+  } catch (err) {
+    console.error('Get module error:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+});
+
+// Get next module info (for locked module banner)
+router.get('/:moduleId/next', authMiddleware, async (req, res) => {
+  try {
+    const { moduleId } = req.params;
+
+    const next = await getNextModulePreview(moduleId);
+    if (typeof next === 'undefined') {
+      return res.status(404).json({ error: 'Модуль не найден' });
+    }
+
+    if (next === null) {
+      return res.json(null);
+    }
+
+    res.json(next);
+  } catch (err) {
+    console.error('Get next module error:', err);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
 });
 
 module.exports = router;
