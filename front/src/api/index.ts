@@ -1,7 +1,149 @@
-import axios from 'axios'; import { API_URL } from '../config/apiBase'
-export type User={id:string;name:string;email:string;xp?:number;streak?:number;is_admin?:boolean;language_pair?:string;onboarding_completed?:boolean}; export type AuthResponse={token:string;user:User}; export type Level={id:string;code:string;name:string;modules:Module[]}; export type Module={id:string;title:string;description?:string}; export type Unit={id:string;title:string;status?:string}; export type Lesson={id:string;title:string;type:string;xp_reward:number;exercises?:Exercise[]}; export type Exercise={id:string;type:string;question:string;options?:string[]};
-const api=axios.create({baseURL:API_URL}); api.interceptors.request.use(c=>{const t=localStorage.getItem('token'); if(t)c.headers.Authorization=`Bearer ${t}`; return c})
-export const login=async(email:string,password:string)=>(await api.post<AuthResponse>('/auth/login',{email,password})).data; export const register=async(payload:{name:string;email:string;password:string})=>(await api.post<AuthResponse>('/auth/register',payload)).data; export const getMe=async()=>(await api.get<User>('/auth/me')).data
-export const getLevels=async()=>(await api.get<Level[]>('/modules/levels')).data; export const getModule=async(id:string)=>(await api.get<{module:Module;units:Unit[]}>(`/modules/${id}`)).data; export const getUnitLessons=async(id:string)=>(await api.get<Lesson[]>(`/lessons/unit/${id}`)).data; export const getLesson=async(id:string)=>(await api.get<Lesson>(`/lessons/${id}`)).data; export const submitAnswer=async(lessonId:string,payload:{exercise_id:string;answer:string})=>(await api.post<{correct:boolean}>(`/lessons/${lessonId}/answer`,payload)).data; export const completeLesson=async(lessonId:string,payload:{score:number;mistakes:number;time_spent:number})=>(await api.post<{xp_earned:number}>(`/lessons/${lessonId}/complete`,payload)).data
-export const getDashboard=async()=>(await api.get<{user:User;skills:{skill_name:string;level:number;progress:number}[];quests:{quest_name:string;current:number;target:number;completed:boolean}[]}>('/progress/dashboard')).data; export const getStats=async()=>(await api.get('/progress/stats')).data; export const getReviewWords=async()=>(await api.get('/progress/review-words')).data; export const getRating=async()=>(await api.get<User[]>('/progress/rating')).data; export const updateProfile=async(payload:Partial<User>)=>(await api.put<User>('/auth/profile',payload)).data
-export default api
+import axios from 'axios';
+import { API_URL } from '../config/apiBase';
+
+const api = axios.create({
+  baseURL: API_URL,
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Auth
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  name: string;
+  language_pair: 'ru-kz' | 'en-kz';
+  learning_goal: 'general' | 'travel' | 'study' | 'work';
+  proficiency_level: 'beginner' | 'elementary' | 'intermediate';
+  age: number;
+  weekly_study_minutes: number;
+}
+
+export const login = (email: string, password: string) =>
+  api.post('/auth/login', { email, password });
+
+export const register = (payload: RegisterPayload) =>
+  api.post('/auth/register', payload);
+
+export const forgotPassword = (email: string) =>
+  api.post('/auth/forgot-password', { email });
+
+export const resetPassword = (token: string, password: string) =>
+  api.post('/auth/reset-password', { token, password });
+
+export interface OnboardingPayload {
+  age: number;
+  weekly_study_minutes: number;
+  language_pair: 'ru-kz' | 'en-kz';
+  learning_goal: 'general' | 'travel' | 'study' | 'work';
+  proficiency_level: 'beginner' | 'elementary' | 'intermediate';
+}
+
+export const completeOnboarding = (payload: OnboardingPayload) =>
+  api.post('/auth/onboarding', payload);
+
+export const getMe = () => api.get('/auth/me');
+
+export interface UpdateProfilePayload {
+  name: string;
+  avatar_url?: string | null;
+  language_pair: 'ru-kz' | 'en-kz';
+  learning_goal: 'general' | 'travel' | 'study' | 'work';
+  proficiency_level?: 'beginner' | 'elementary' | 'intermediate';
+}
+
+export const updateProfile = (payload: UpdateProfilePayload) =>
+  api.put('/auth/profile', payload);
+
+export const uploadAvatar = (file: File) => {
+  const body = new FormData();
+  body.append('avatar', file);
+  return api.post('/auth/avatar', body, { headers: { 'Content-Type': 'multipart/form-data' } });
+};
+
+// Modules
+export const getLevels = () => api.get('/modules/levels');
+
+export const getModule = (moduleId: number) =>
+  api.get(`/modules/${moduleId}`);
+
+export const getNextModule = (moduleId: number) =>
+  api.get(`/modules/${moduleId}/next`);
+
+// Lessons
+export const getUnitLessons = (unitId: number) =>
+  api.get(`/lessons/unit/${unitId}`);
+
+export const getLesson = (lessonId: number) =>
+  api.get(`/lessons/${lessonId}`);
+
+export const submitAnswer = (lessonId: number, exerciseId: number, answer: string) =>
+  api.post(`/lessons/${lessonId}/answer`, { exerciseId, answer });
+
+export const completeLesson = (lessonId: number, data: { score: number; mistakes: number; timeSpent: number }) =>
+  api.post(`/lessons/${lessonId}/complete`, data);
+
+// Progress
+export const getDashboard = () => api.get('/progress/dashboard');
+
+export const getReviewWords = () => api.get<{ words: string[] }>('/progress/review-words');
+
+export const getStats = () => api.get('/progress/stats');
+
+export const getProverb = () => api.get('/progress/proverb');
+
+// Admin
+export const adminGetStats = () => api.get('/admin/stats');
+
+export const adminGetLevels = () => api.get('/admin/levels');
+export const adminCreateLevel = (data: object) => api.post('/admin/levels', data);
+export const adminUpdateLevel = (id: number, data: object) => api.put(`/admin/levels/${id}`, data);
+export const adminDeleteLevel = (id: number) => api.delete(`/admin/levels/${id}`);
+
+export const adminGetModules = () => api.get('/admin/modules');
+export const adminCreateModule = (data: object) => api.post('/admin/modules', data);
+export const adminUpdateModule = (id: number, data: object) => api.put(`/admin/modules/${id}`, data);
+export const adminDeleteModule = (id: number) => api.delete(`/admin/modules/${id}`);
+
+export const adminGetUnits = () => api.get('/admin/units');
+export const adminCreateUnit = (data: object) => api.post('/admin/units', data);
+export const adminUpdateUnit = (id: number, data: object) => api.put(`/admin/units/${id}`, data);
+export const adminUpdateUnitLayout = (id: number, data: object) => api.put(`/admin/units/${id}/layout`, data);
+export const adminDeleteUnit = (id: number) => api.delete(`/admin/units/${id}`);
+export const adminUploadUnitPathImage = (unitId: number, formData: FormData) =>
+  api.post(`/admin/units/${unitId}/path-image`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const adminDeleteUnitPathImage = (unitId: number) => api.delete(`/admin/units/${unitId}/path-image`);
+export const adminCreateLandmark = (unitId: number, formData: FormData) =>
+  api.post(`/admin/units/${unitId}/landmarks`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const adminUpdateLandmark = (unitId: number, landmarkId: number, formData: FormData) =>
+  api.put(`/admin/units/${unitId}/landmarks/${landmarkId}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const adminDeleteLandmark = (unitId: number, landmarkId: number) => api.delete(`/admin/units/${unitId}/landmarks/${landmarkId}`);
+
+export const adminGetLessons = (unitId?: number) =>
+  api.get('/admin/lessons', { params: unitId ? { unit_id: unitId } : {} });
+export const adminCreateLesson = (data: object) => api.post('/admin/lessons', data);
+export const adminUpdateLesson = (id: number, data: object) => api.put(`/admin/lessons/${id}`, data);
+export const adminDeleteLesson = (id: number) => api.delete(`/admin/lessons/${id}`);
+
+export const adminGetExercises = (lessonId?: number) =>
+  api.get('/admin/exercises', { params: lessonId ? { lesson_id: lessonId } : {} });
+export const adminCreateExercise = (data: object) => api.post('/admin/exercises', data);
+export const adminUpdateExercise = (id: number, data: object) => api.put(`/admin/exercises/${id}`, data);
+export const adminDeleteExercise = (id: number) => api.delete(`/admin/exercises/${id}`);
+
+// Chat
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export const sendChatMessage = (messages: ChatMessage[]) =>
+  api.post('/chat', { messages });
+
+export default api;
