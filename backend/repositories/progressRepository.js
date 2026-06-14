@@ -357,16 +357,19 @@ async function getReviewWordsForUserMongo(userId) {
 
 async function getRatingMongo() {
   const { User } = await getMongoModels();
+
   const users = await User.find({ isAdmin: false })
     .sort({ xp: -1, createdAt: 1 })
     .limit(50)
     .lean();
 
   return users.map((user) => ({
-    id: user.legacyId ?? String(user._id),
+    id: String(user._id),
+    legacyId: user.legacyId ?? null,
     name: user.name,
-    xp: user.xp || 0,
-    streak: user.streak || 0,
+    email: user.email,
+    xp: Number(user.xp) || 0,
+    streak: Number(user.streak) || 0,
   }));
 }
 
