@@ -5,7 +5,6 @@ require('dotenv').config();
 
 const { getDbProvider } = require('./config/dbProvider');
 const { bootstrapDataLayer } = require('./db/bootstrap');
-
 const authRoutes = require('./routes/auth');
 const moduleRoutes = require('./routes/modules');
 const lessonRoutes = require('./routes/lessons');
@@ -19,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/modules', moduleRoutes);
 app.use('/api/lessons', lessonRoutes);
@@ -26,6 +26,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',

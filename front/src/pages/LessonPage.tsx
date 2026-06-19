@@ -15,9 +15,11 @@ interface Exercise {
   id: number;
   type: string;
   question: string;
+  question_en: string | null;
   options: string[];
   correct_answer: string;
   explanation: string | null;
+  explanation_en: string | null;
 }
 
 interface LessonData {
@@ -32,6 +34,7 @@ interface LessonData {
 type FeedbackState = {
   correct: boolean;
   explanation?: string | null;
+  explanation_en?: string | null;
   correct_answer?: string;
 } | null;
 
@@ -321,6 +324,124 @@ function GrammarExercise({
   );
 }
 
+// ── Matching Exercise ─────────────────────────────────────────────────────────
+function MatchingExercise({
+  exercise, selectedAnswer, setSelectedAnswer, feedback,
+}: {
+  exercise: Exercise;
+  selectedAnswer: string;
+  setSelectedAnswer: (v: string) => void;
+  feedback: FeedbackState;
+}) {
+  // options — левая колонка (казахские слова)
+  // correct_answer — JSON-массив правой колонки (переводы) в том же порядке
+  const leftItems = exercise.options || [];
+  const rightItemsOrdered: string[] = (() => {
+    try { return JSON.parse(exercise.correct_answer); } catch { return []; }
+  })();
+
+  // Перемешиваем правую колонку один раз при маунте
+  const [rightItems] = useState(() => [...rightItemsOrdered].sort(() => Math.random() - 0.5));
+
+  // Текущие пары: { leftIndex: rightItem }
+  const pairs: Record<number, string> = selectedAnswer
+    ? (() => { try { return JSON.parse(selectedAnswer); } catch { return {}; } })()
+    : {};
+
+  const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
+
+  const handleLeftClick = (i: number) => {
+    if (feedback) return;
+    setSelectedLeft(prev => (prev === i ? null : i));
+  };
+
+  const handleRightClick = (rightItem: string) => {
+    if (feedback) return;
+    if (selectedLeft === null) return;
+
+    const newPairs = { ...pairs };
+
+    // Если правый элемент уже занят — убрать старую пару
+    const existingLeft = Object.entries(newPairs).find(([, v]) => v === rightItem);
+    if (existingLeft) delete newPairs[Number(existingLeft[0])];
+
+    newPairs[selectedLeft] = rightItem;
+    setSelectedAnswer(JSON.stringify(newPairs));
+    setSelectedLeft(null);
+  };
+
+  const removePair = (leftIndex: number) => {
+    if (feedback) return;
+    const newPairs = { ...pairs };
+    delete newPairs[leftIndex];
+    setSelectedAnswer(JSON.stringify(newPairs));
+  };
+
+  const allMatched = leftItems.length > 0 && Object.keys(pairs).length === leftItems.length;
+
+  // Для подсветки после проверки: строим правильный маппинг
+  const correctMap: Record<number, string> = {};
+  leftItems.forEach((_, i) => { correctMap[i] = rightItemsOrdered[i]; });
+
+  const getPairStatus = (leftIndex: number) => {
+    if (!feedback) return '';
+    const chosen = pairs[leftIndex];
+    if (!chosen) return 'wrong';
+    return chosen === correctMap[leftIndex] ? 'correct' : 'wrong';
+  };
+
+  return (
+    <div className="matching-wrap">
+      <div className="matching-columns">
+        {/* Левая колонка */}
+        <div className="matching-col matching-col-left">
+          {leftItems.map((item, i) => (
+            <div
+              key={i}
+              className={[
+                'matching-item',
+                selectedLeft === i ? 'selected' : '',
+                pairs[i] ? 'matched' : '',
+                feedback ? getPairStatus(i) : '',
+              ].filter(Boolean).join(' ')}
+              onClick={() => pairs[i] ? removePair(i) : handleLeftClick(i)}
+            >
+              {item}
+              {pairs[i] && <span className="matching-arrow">→ {pairs[i]}</span>}
+            </div>
+          ))}
+        </div>
+
+        {/* Правая колонка */}
+        <div className="matching-col matching-col-right">
+          {rightItems.map((item, i) => {
+            const isUsed = Object.values(pairs).includes(item);
+            return (
+              <div
+                key={i}
+                className={[
+                  'matching-item',
+                  isUsed ? 'matched' : '',
+                  selectedLeft !== null && !isUsed ? 'selectable' : '',
+                ].filter(Boolean).join(' ')}
+                onClick={() => !isUsed && handleRightClick(item)}
+              >
+                {item}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {!allMatched && !feedback && (
+        <p className="matching-hint">
+         
+        </p>
+      )}
+    </div>
+  );
+}
+
 function LessonShell({ badge, title, subtitle, children }: LessonShellProps) {
   return (
     <div className="lesson-page">
@@ -356,7 +477,7 @@ function LessonShell({ badge, title, subtitle, children }: LessonShellProps) {
 }
 
 export default function LessonPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { lessonId } = useParams();
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
@@ -545,10 +666,20 @@ export default function LessonPage() {
 
     if (isMatch) {
       setScore(prev => prev + Math.floor(100 / totalExercises));
-      setFeedback({ correct: true, correct_answer: exercise.correct_answer });
+      setFeedback({
+        correct: true,
+        correct_answer: exercise.correct_answer,
+        explanation: exercise.explanation,
+        explanation_en: exercise.explanation_en,
+      });
     } else {
       setMistakes(prev => prev + 1);
-      setFeedback({ correct: false, correct_answer: exercise.correct_answer });
+      setFeedback({
+        correct: false,
+        correct_answer: exercise.correct_answer,
+        explanation: exercise.explanation,
+        explanation_en: exercise.explanation_en,
+      });
     }
   };
 
@@ -617,7 +748,7 @@ export default function LessonPage() {
 
         <div className="exercise-area lesson-exercise-card">
           <div className="exercise-type-badge">{exerciseTypeLabel}</div>
-          <h2 className="exercise-question">{exercise.question}</h2>
+          <h2 className="exercise-question">{(lang === 'en' && exercise.question_en) ? exercise.question_en : exercise.question}</h2>
 
           {exercise.type === 'speaking' ? (
             <div className="lesson-speaking-wrap">
@@ -652,7 +783,15 @@ export default function LessonPage() {
               setSelectedAnswer={setSelectedAnswer}
               feedback={feedback}
             />
-          ) : (
+          ) :  exercise.type === 'matching' ? (
+            <MatchingExercise
+              key={exercise.id}
+              exercise={exercise}
+              selectedAnswer={selectedAnswer}
+              setSelectedAnswer={setSelectedAnswer}
+              feedback={feedback}
+            />
+          ) :  (
             <div className="exercise-options">
               {exercise.options && exercise.options.map((option: string, i: number) => (
                 <button
@@ -686,7 +825,13 @@ export default function LessonPage() {
                 {!feedback.correct && feedback.correct_answer && (
                   <span> · {t('lesson.correctAnswer')}: <strong>{feedback.correct_answer}</strong></span>
                 )}
-                {feedback.explanation && <p className="feedback-explanation">{feedback.explanation}</p>}
+                {(lang === 'en' && feedback.explanation_en
+                    ? feedback.explanation_en
+                    : feedback.explanation) && (
+                  <p className="feedback-explanation">
+                    {lang === 'en' && feedback.explanation_en ? feedback.explanation_en : feedback.explanation}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -707,7 +852,15 @@ export default function LessonPage() {
             <button
               className="lesson-btn check"
               onClick={handleCheck}
-              disabled={!selectedAnswer}
+              disabled={
+                !selectedAnswer ||
+                (exercise.type === 'matching' && (() => {
+                  try {
+                    const pairs = JSON.parse(selectedAnswer);
+                    return Object.keys(pairs).length < (exercise.options?.length || 0);
+                  } catch { return true; }
+                })())
+              }
             >
               {t('lesson.check')}
             </button>

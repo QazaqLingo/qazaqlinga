@@ -48,6 +48,7 @@ router.get('/:lessonId', authMiddleware, async (req, res) => {
 });
 
 // Submit exercise answer
+// Submit exercise answer
 router.post('/:lessonId/answer', authMiddleware, async (req, res) => {
   try {
     const { lessonId } = req.params;
@@ -59,13 +60,32 @@ router.post('/:lessonId/answer', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Упражнение не найдено' });
     }
 
-    const normalizedAnswer = String(answer || '').trim().toLowerCase();
-    const isCorrect = String(exercise.correct_answer || '').trim().toLowerCase() === normalizedAnswer;
+    let isCorrect = false;
+
+    if (exercise.type === 'matching') {
+      try {
+        // answer приходит как JSON: {"0":"friend","1":"adult","2":"morning","3":"evening"}
+        // correct_answer хранится как JSON-массив: ["friend","adult","morning","evening"]
+        const userPairs = JSON.parse(answer);
+        const correctArray = JSON.parse(exercise.correct_answer);
+
+        // Проверяем что все пары совпадают
+        isCorrect =
+          correctArray.length > 0 &&
+          correctArray.every((correctValue, index) => userPairs[index] === correctValue);
+      } catch {
+        isCorrect = false;
+      }
+    } else {
+      const normalizedAnswer = String(answer || '').trim().toLowerCase();
+      isCorrect = String(exercise.correct_answer || '').trim().toLowerCase() === normalizedAnswer;
+    }
 
     res.json({
       correct: isCorrect,
       correct_answer: exercise.correct_answer,
       explanation: exercise.explanation,
+      explanation_en: exercise.explanation_en,
     });
   } catch (err) {
     if (err?.code === 'UNIT_LOCKED') {

@@ -1,44 +1,26 @@
 services:
-
-  # MongoDB
-  mongo:
-    image: mongo:7
-    container_name: qazaqlinga_mongo
-    restart: unless-stopped
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - qazaqlinga_net
-
-  # Node.js backend
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: qazaqlinga_backend
     restart: unless-stopped
-    depends_on:
-      - mongo
     env_file:
       - ./backend/.env
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/kazakh_learn
       - DB_PROVIDER=mongo
     volumes:
-      # Загруженные файлы хранятся вне контейнера
       - uploads_data:/app/uploads
     ports:
       - "5000:5000"
     networks:
       - qazaqlinga_net
 
-  # React frontend
   frontend:
     build:
       context: ./front
       dockerfile: Dockerfile
       args:
-        # Адрес бэкенда, который видит браузер пользователя
         VITE_API_URL: http://localhost:5000
     container_name: qazaqlinga_frontend
     restart: unless-stopped
@@ -50,7 +32,6 @@ services:
       - qazaqlinga_net
 
 volumes:
-  mongo_data:
   uploads_data:
 
 networks:

@@ -921,3 +921,80 @@
   background: #fef2f2;
   color: #991b1b;
 }
+
+/* ── Matching ─────────────────────────────────── */
+.matching-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.matching-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.matching-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matching-item {
+  padding: 10px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: all 0.15s;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.matching-item:hover:not(.matched) {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.matching-item.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.matching-item.selectable {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.matching-item.matched {
+  border-color: #86efac;
+  background: #f0fdf4;
+  cursor: pointer; /* клик снимает пару */
+}
+
+.matching-item.correct {
+  border-color: #22c55e;
+  background: #dcfce7;
+}
+
+.matching-item.wrong {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.matching-arrow {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.matching-hint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0;
+}

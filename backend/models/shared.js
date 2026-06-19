@@ -3,8 +3,8 @@ const { getMongoose } = require('../config/mongo');
 const mongoose = getMongoose();
 const { Schema } = mongoose;
 
-const lessonTypeValues = ['translation', 'choice', 'grammar', 'sentence', 'listening', 'speaking', 'theory'];
-const exerciseTypeValues = ['translation', 'choice', 'grammar', 'sentence', 'listening', 'speaking'];
+const lessonTypeValues = ['translation', 'choice', 'grammar', 'sentence', 'listening', 'speaking', 'theory', 'matching'];
+const exerciseTypeValues = ['translation', 'choice', 'grammar', 'sentence', 'listening', 'speaking', 'matching'];
 
 const pointSchema = new Schema(
   {
